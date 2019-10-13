@@ -1,13 +1,13 @@
-package com.bogdan.springpersistentweb;
+package com.bogdan.persistentweb;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringPersistentWebApplication {
+public class PersistentWebApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringPersistentWebApplication.class, args);
+		SpringApplication.run(PersistentWebApplication.class, args);
 	}
 
 }
