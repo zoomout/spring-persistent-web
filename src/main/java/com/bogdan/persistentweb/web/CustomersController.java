@@ -50,7 +50,7 @@ public class CustomersController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping(value = "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<CustomerDto> putCustomer(@ValidLong @PathVariable String id,
                                                    @Valid @RequestBody CustomerDto customerDto) {
         return customersService
