@@ -5,26 +5,25 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Objects;
 
-public class CustomerDto extends IdDto {
+public class ProductDto extends IdDto {
 
     @LeadingOrTrailingSpacesNotAllowed
     @NotNull(message = "should not be null")
-    private final String name;
+    private final String title;
 
     @JsonCreator
-    public CustomerDto(
+    public ProductDto(
             @JsonProperty("id") final String id,
-            @JsonProperty("name") final String name
+            @JsonProperty("name") final String title
     ) {
         super(id);
-        this.name = name;
+        this.title = title;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     @Override
@@ -32,12 +31,12 @@ public class CustomerDto extends IdDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        CustomerDto that = (CustomerDto) o;
-        return Objects.equals(name, that.name);
+        ProductDto that = (ProductDto) o;
+        return Objects.equals(title, that.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name);
+        return Objects.hash(super.hashCode(), title);
     }
 }
