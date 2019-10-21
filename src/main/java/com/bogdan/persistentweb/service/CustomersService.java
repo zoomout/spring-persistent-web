@@ -1,13 +1,11 @@
 package com.bogdan.persistentweb.service;
 
-import com.bogdan.persistentweb.domain.BaseEntity;
 import com.bogdan.persistentweb.domain.Customer;
 import com.bogdan.persistentweb.domain.Product;
 import com.bogdan.persistentweb.repository.CustomersRepository;
 import com.bogdan.persistentweb.repository.ProductsRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,7 +32,7 @@ public class CustomersService {
     }
 
     public Customer create(Customer customer) {
-        Customer entity = new Customer();
+        final Customer entity = new Customer();
         entity.setName(customer.getName());
         return customersRepository.save(entity);
     }
@@ -50,29 +48,24 @@ public class CustomersService {
     }
 
     public void delete(long id) {
-        unlinkAllProducts(id);
-        customersRepository.deleteById(get(id).getId());
+        final Customer customer = get(id);
+        customer.getProducts().forEach(p -> p.removeCustomer(customer));
+        customersRepository.deleteById(customer.getId());
     }
 
-    public void linkProducts(long customerId, Set<Long> productsIds) {
+    public void addProducts(long customerId, Set<Long> productsIds) {
         final Customer customer = get(customerId);
-        customer.setProducts(productsIds.stream()
+        productsIds.stream()
                 .map(id -> productsRepository.findById(id).orElseThrow(productNotFoundException(id)))
-                .collect(Collectors.toSet()));
+                .forEach(customer::addProduct);
         customersRepository.save(customer);
     }
 
-    public void unlinkProducts(long customerId, Set<Long> productsIds) {
+    public void removeProducts(long customerId, Set<Long> productsIds) {
         final Customer customer = get(customerId);
-        final Set<Product> productsWithoutRemovedOnes = customer.getProducts().stream()
-                .filter(p -> !productsIds.contains(p.getId())).collect(Collectors.toSet());
-        customer.setProducts(productsWithoutRemovedOnes);
-        customersRepository.save(customer);
-    }
-
-    private void unlinkAllProducts(long customerId) {
-        final Customer customer = get(customerId);
-        customer.setProducts(new HashSet<>());
+        Set<Product> productsToRemove = customer.getProducts().stream()
+                .filter(p -> productsIds.contains(p.getId())).collect(Collectors.toSet());
+        productsToRemove.forEach(customer::removeProduct);
         customersRepository.save(customer);
     }
 

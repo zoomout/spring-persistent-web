@@ -19,7 +19,7 @@ public class Customer extends BaseEntity {
         this.name = name;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(
             name = "customer_product",
             joinColumns = {@JoinColumn(name = "customer_id")},
@@ -31,8 +31,12 @@ public class Customer extends BaseEntity {
         return products;
     }
 
-    public void setProducts(Set<Product> products) {
-        this.products = products;
+    public void addProduct(Product product) {
+        this.products.add(product);
+    }
+
+    public void removeProduct(Product product) {
+        this.products.remove(product);
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.bogdan.persistentweb.mapper.IdsMapper.toIdsSet;
 import static com.bogdan.persistentweb.utils.UriUtil.createUri;
 import static java.lang.Long.parseLong;
 
@@ -26,42 +27,37 @@ import static java.lang.Long.parseLong;
 public class ProductsController {
 
     private final ProductsService productsService;
-    private final ProductMapper productMapper;
-    private final CustomerMapper customerMapper;
 
     public ProductsController(
-            ProductsService productsService,
-            ProductMapper productMapper,
-            CustomerMapper customerMapper
+            ProductsService productsService
     ) {
         this.productsService = productsService;
-        this.productMapper = productMapper;
-        this.customerMapper = customerMapper;
     }
 
     @GetMapping
     public List<ProductDto> getProducts() {
         return productsService
                 .getProducts().stream()
-                .map(productMapper::toDto)
+                .sorted()
+                .map(ProductMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
     public ResponseEntity<ProductDto> postProduct(@Valid @RequestBody ProductDto productDto) {
-        final Product createdProduct = productsService.create(productMapper.toEntity(productDto));
+        final Product createdProduct = productsService.create(ProductMapper.toEntity(productDto));
         return ResponseEntity.created(createUri("/products/" + createdProduct.getId())).build();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProduct(@ValidLong @PathVariable String id) {
-        return ResponseEntity.ok().body(productMapper.toDto(productsService.get(parseLong(id))));
+        return ResponseEntity.ok().body(ProductMapper.toDto(productsService.get(parseLong(id))));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity putProduct(@ValidLong @PathVariable String id,
                                      @Valid @RequestBody ProductDto productDto) {
-        productsService.update(productMapper.toEntity(parseLong(id), productDto));
+        productsService.update(ProductMapper.toEntity(parseLong(id), productDto));
         return ResponseEntity.noContent().build();
     }
 
@@ -76,26 +72,26 @@ public class ProductsController {
         return ResponseEntity.ok().body(
                 productsService.get(parseLong(id)).getCustomers().stream()
                         .sorted()
-                        .map(customerMapper::toDto)
+                        .map(CustomerMapper::toDto)
                         .collect(Collectors.toCollection(LinkedHashSet::new))
         );
     }
 
     @PutMapping("/{id}/customers")
-    public ResponseEntity putProductProducts(
+    public ResponseEntity putProductCustomers(
             @ValidLong @PathVariable String id,
-            @RequestBody Set<Long> productIds
+            @RequestBody Set<CustomerDto> customersIds
     ) {
-        productsService.linkCustomers(parseLong(id), productIds);
+        productsService.addCustomers(parseLong(id), toIdsSet(customersIds));
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}/products")
-    public ResponseEntity deleteProductProducts(
+    @DeleteMapping("/{id}/customers")
+    public ResponseEntity deleteProductCustomers(
             @ValidLong @PathVariable String id,
-            @RequestBody Set<Long> productIds
+            @RequestBody Set<CustomerDto> customersIds
     ) {
-        productsService.unlinkCustomers(parseLong(id), productIds);
+        productsService.removeCustomers(parseLong(id), toIdsSet(customersIds));
         return ResponseEntity.noContent().build();
     }
 

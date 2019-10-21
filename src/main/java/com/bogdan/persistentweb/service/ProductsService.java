@@ -1,16 +1,14 @@
 package com.bogdan.persistentweb.service;
 
-import com.bogdan.persistentweb.domain.BaseEntity;
 import com.bogdan.persistentweb.domain.Customer;
 import com.bogdan.persistentweb.domain.Product;
 import com.bogdan.persistentweb.repository.CustomersRepository;
 import com.bogdan.persistentweb.repository.ProductsRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.bogdan.persistentweb.exception.ExceptionsSuppliers.customerNotFoundException;
 import static com.bogdan.persistentweb.exception.ExceptionsSuppliers.productNotFoundException;
@@ -34,7 +32,7 @@ public class ProductsService {
     }
 
     public Product create(Product product) {
-        Product entity = new Product();
+        final Product entity = new Product();
         entity.setTitle(product.getTitle());
         return productsRepository.save(entity);
     }
@@ -50,29 +48,24 @@ public class ProductsService {
     }
 
     public void delete(long id) {
-        unlinkAllCustomers(id);
-        productsRepository.deleteById(get(id).getId());
+        final Product product = get(id);
+        product.getCustomers().forEach(c -> c.removeProduct(product));
+        productsRepository.deleteById(product.getId());
     }
 
-    public void linkCustomers(long productId, Set<Long> customersIds) {
-        Product product = get(productId);
-        product.setCustomers(customersIds.stream()
+    public void addCustomers(long productId, Set<Long> customersIds) {
+        final Product product = get(productId);
+        customersIds.stream()
                 .map(id -> customersRepository.findById(id).orElseThrow(customerNotFoundException(id)))
-                .collect(Collectors.toSet()));
+                .forEach(product::addCustomer);
         productsRepository.save(product);
     }
 
-    public void unlinkCustomers(long productId, Set<Long> customersIds) {
+    public void removeCustomers(long productId, Set<Long> customersIds) {
         final Product product = get(productId);
-        final Set<Customer> customersWithoutRemovedOnes = product.getCustomers().stream()
-                .filter(p -> !customersIds.contains(p.getId())).collect(Collectors.toSet());
-        product.setCustomers(customersWithoutRemovedOnes);
-        productsRepository.save(product);
-    }
-
-    public void unlinkAllCustomers(long productId) {
-        final Product product = get(productId);
-        product.setCustomers(new HashSet<>());
+        final Stream<Customer> customersToRemove = product.getCustomers().stream()
+                .filter(c -> customersIds.contains(c.getId()));
+        customersToRemove.forEach(product::removeCustomer);
         productsRepository.save(product);
     }
 
