@@ -3,7 +3,7 @@ package com.bogdan.persistentweb.domain;
 import javax.persistence.*;
 
 @MappedSuperclass
-public class BaseEntity {
+public class BaseEntity implements Comparable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,5 +36,13 @@ public class BaseEntity {
 
     public void setId(final Long id) {
         this.id = id;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (o instanceof BaseEntity) {
+            return (int) (id - ((BaseEntity) o).getId());
+        }
+        return -1;
     }
 }

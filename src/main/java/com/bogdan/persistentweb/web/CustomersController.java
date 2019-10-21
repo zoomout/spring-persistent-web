@@ -2,7 +2,9 @@ package com.bogdan.persistentweb.web;
 
 import com.bogdan.persistentweb.domain.Customer;
 import com.bogdan.persistentweb.dto.CustomerDto;
+import com.bogdan.persistentweb.dto.ProductDto;
 import com.bogdan.persistentweb.mapper.CustomerMapper;
+import com.bogdan.persistentweb.mapper.ProductMapper;
 import com.bogdan.persistentweb.service.CustomersService;
 import com.bogdan.persistentweb.validation.ValidLong;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +12,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.bogdan.persistentweb.utils.UriUtil.createUri;
+import static java.lang.Long.parseLong;
 
 @RestController
 @RequestMapping("/customers")
@@ -22,10 +27,16 @@ public class CustomersController {
 
     private final CustomersService customersService;
     private final CustomerMapper customerMapper;
+    private final ProductMapper productMapper;
 
-    public CustomersController(CustomersService customersService, CustomerMapper customerMapper) {
+    public CustomersController(
+            CustomersService customersService,
+            CustomerMapper customerMapper,
+            ProductMapper productMapper
+    ) {
         this.customersService = customersService;
         this.customerMapper = customerMapper;
+        this.productMapper = productMapper;
     }
 
     @GetMapping
@@ -44,27 +55,47 @@ public class CustomersController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDto> getCustomer(@ValidLong @PathVariable String id) {
-        return customersService
-                .get(Long.parseLong(id))
-                .map(customer -> ResponseEntity.ok().body(customerMapper.toDto(customer)))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok().body(customerMapper.toDto(customersService.get(parseLong(id))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDto> putCustomer(@ValidLong @PathVariable String id,
-                                                   @Valid @RequestBody CustomerDto customerDto) {
-        return customersService
-                .update(customerMapper.toEntity(Long.parseLong(id), customerDto))
-                .map(customer -> ResponseEntity.ok().body(customerMapper.toDto(customer)))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity putCustomer(@ValidLong @PathVariable String id,
+                                      @Valid @RequestBody CustomerDto customerDto) {
+        customersService.update(customerMapper.toEntity(parseLong(id), customerDto));
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCustomer(@ValidLong @PathVariable String id) {
-        return customersService
-                .delete(Long.parseLong(id))
-                .map(ignored -> ResponseEntity.noContent().build())
-                .orElse(ResponseEntity.notFound().build());
+        customersService.delete(parseLong(id));
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/products")
+    public ResponseEntity<Set<ProductDto>> getCustomerProducts(@ValidLong @PathVariable String id) {
+        return ResponseEntity.ok().body(
+                customersService.get(parseLong(id)).getProducts().stream()
+                        .sorted()
+                        .map(productMapper::toDto).collect(Collectors.toCollection(LinkedHashSet::new)
+                ));
+    }
+
+    @PutMapping("/{id}/products")
+    public ResponseEntity putCustomerProducts(
+            @ValidLong @PathVariable String id,
+            @RequestBody Set<Long> productIds
+    ) {
+        customersService.linkProducts(parseLong(id), productIds);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/products")
+    public ResponseEntity deleteCustomerProducts(
+            @ValidLong @PathVariable String id,
+            @RequestBody Set<Long> productIds
+    ) {
+        customersService.unlinkProducts(parseLong(id), productIds);
+        return ResponseEntity.noContent().build();
     }
 
 }

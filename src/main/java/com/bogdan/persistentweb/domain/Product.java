@@ -1,8 +1,6 @@
 package com.bogdan.persistentweb.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -21,15 +19,15 @@ public class Product extends BaseEntity {
         this.title = title;
     }
 
-    @ManyToMany(mappedBy = "products")
-    private Set<Customer> employees = new HashSet<>();
+    @ManyToMany(cascade = {CascadeType.ALL}, mappedBy = "products", fetch = FetchType.LAZY)
+    private Set<Customer> customers = new HashSet<>();
 
-    public Set<Customer> getEmployees() {
-        return employees;
+    public Set<Customer> getCustomers() {
+        return customers;
     }
 
-    public void setEmployees(Set<Customer> employees) {
-        this.employees = employees;
+    public void setCustomers(Set<Customer> Customers) {
+        this.customers = Customers;
     }
 
     @Override

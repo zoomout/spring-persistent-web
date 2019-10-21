@@ -29,12 +29,27 @@ public class RestExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity handleProductNotFoundException(
+            final HttpServletRequest req,
+            final EntityNotFoundException e) {
+        return new ResponseEntity<>(
+                new ErrorDetails(null, e.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
     @ExceptionHandler(Throwable.class)
     @ResponseBody
     public ResponseEntity handleException(
             final HttpServletRequest req,
             final Throwable e
     ) {
-        return new ResponseEntity<>("An error occurred. Check logs.", HttpStatus.INTERNAL_SERVER_ERROR);
+        e.printStackTrace();
+        return new ResponseEntity<>(
+                new ErrorDetails(null, "An error occurred. Please check the logs for more details."),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

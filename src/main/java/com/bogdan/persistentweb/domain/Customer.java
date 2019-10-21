@@ -19,7 +19,7 @@ public class Customer extends BaseEntity {
         this.name = name;
     }
 
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "customer_product",
             joinColumns = {@JoinColumn(name = "customer_id")},
