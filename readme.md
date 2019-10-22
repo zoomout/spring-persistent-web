@@ -1,5 +1,15 @@
 # Demo Spring boot web application with persistence
 
+# Test
+ - unit test
+ ```
+./gradlew cleanTest test
+```
+- integration test
+```
+./gradlew cleanTest integrationTest
+```
+
 # Work with Database
 - start DB
     ```

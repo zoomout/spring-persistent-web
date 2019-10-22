@@ -16,7 +16,7 @@ public class ProductDto extends IdDto {
     @JsonCreator
     public ProductDto(
             @JsonProperty("id") final String id,
-            @JsonProperty("name") final String title
+            @JsonProperty("title") final String title
     ) {
         super(id);
         this.title = title;
