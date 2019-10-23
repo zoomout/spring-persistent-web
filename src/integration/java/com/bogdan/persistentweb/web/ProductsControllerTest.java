@@ -124,7 +124,7 @@ class ProductsControllerTest {
     // Given customer is created
     final TestProduct createdProduct = createProduct();
 
-    // When get all customers is called
+    // When get all product customers is called
     final ResultActions result = client.getAll(PRODUCTS_PATH + createdProduct.getId() + CUSTOMERS_PATH);
 
     // Then response is '200 - OK' and empty array in payload

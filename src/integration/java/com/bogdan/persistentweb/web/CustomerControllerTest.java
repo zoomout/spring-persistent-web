@@ -76,6 +76,7 @@ class CustomerControllerTest {
   void callingPost_withInvalidContent_shouldReturn400(final String payload) throws Exception {
     // When create a customer with invalid customer payload
     final ResultActions result = client.post(CUSTOMERS_PATH, payload);
+
     // Then expect response 400 - Bad request
     result.andExpect(status().isBadRequest());
   }
@@ -124,7 +125,7 @@ class CustomerControllerTest {
     // Given customer is created
     final TestCustomer createdCustomer = createCustomer();
 
-    // When get all customers is called
+    // When get all customer products is called
     final ResultActions result = client.getAll(CUSTOMERS_PATH + createdCustomer.getId() + PRODUCTS_PATH);
 
     // Then response is '200 - OK' and empty array in payload

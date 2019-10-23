@@ -20,6 +20,11 @@ public class ApiClient {
         .post(path).header(CONTENT_TYPE, APPLICATION_JSON).content(content));
   }
 
+  public ResultActions put(String path, String content) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders
+        .put(path).header(CONTENT_TYPE, APPLICATION_JSON).content(content));
+  }
+
   public ResultActions get(String path, String id) throws Exception {
     return this.mockMvc.perform(MockMvcRequestBuilders.get(path + id));
   }
@@ -30,6 +35,11 @@ public class ApiClient {
 
   public ResultActions delete(String path, String id) throws Exception {
     return this.mockMvc.perform(MockMvcRequestBuilders.delete(path + id));
+  }
+
+  public ResultActions deleteSubresources(String path, String content) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders.delete(path)
+        .header(CONTENT_TYPE, APPLICATION_JSON).content(content));
   }
 
 }
