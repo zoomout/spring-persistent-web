@@ -18,32 +18,32 @@ import java.util.stream.Collectors;
 @RestController
 public class MethodArgumentNotValidExceptionExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
-        final List<ErrorDetails> errors = ex
-                .getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(fieldError -> new ErrorDetails(
-                        fieldError.getField(),
-                        fieldError.getDefaultMessage()
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    final List<ErrorDetails> errors = ex
+        .getBindingResult()
+        .getFieldErrors()
+        .stream()
+        .map(fieldError -> new ErrorDetails(
+            fieldError.getField(),
+            fieldError.getDefaultMessage()
 
-                ))
-                .collect(Collectors.toList());
-        return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
-    }
+        ))
+        .collect(Collectors.toList());
+    return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
+  }
 
-    @Override
-    protected ResponseEntity<Object> handleMissingServletRequestParameter(
-            MissingServletRequestParameterException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
-        final ErrorDetails errorDetails = new ErrorDetails(ex.getParameterName(), ex.getMessage());
-        return handleExceptionInternal(ex, errorDetails, headers, HttpStatus.BAD_REQUEST, request);
-    }
+  @Override
+  protected ResponseEntity<Object> handleMissingServletRequestParameter(
+      MissingServletRequestParameterException ex,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    final ErrorDetails errorDetails = new ErrorDetails(ex.getParameterName(), ex.getMessage());
+    return handleExceptionInternal(ex, errorDetails, headers, HttpStatus.BAD_REQUEST, request);
+  }
 }

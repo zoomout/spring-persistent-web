@@ -9,25 +9,27 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 public class ApiClient {
 
-    private String url;
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    public ApiClient(String url, MockMvc mockMvc) {
-        this.url = url;
-        this.mockMvc = mockMvc;
-    }
+  public ApiClient(MockMvc mockMvc) {
+    this.mockMvc = mockMvc;
+  }
 
-    public ResultActions post(String content) throws Exception {
-        return this.mockMvc.perform(MockMvcRequestBuilders
-                .post(url).header(CONTENT_TYPE, APPLICATION_JSON).content(content));
-    }
+  public ResultActions post(String path, String content) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders
+        .post(path).header(CONTENT_TYPE, APPLICATION_JSON).content(content));
+  }
 
-    public ResultActions get(String id) throws Exception {
-        return this.mockMvc.perform(MockMvcRequestBuilders.get(url + id));
-    }
+  public ResultActions get(String path, String id) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders.get(path + id));
+  }
 
-    public ResultActions delete(String id) throws Exception {
-        return this.mockMvc.perform(MockMvcRequestBuilders.delete(url + id));
-    }
+  public ResultActions getAll(String path) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders.get(path));
+  }
+
+  public ResultActions delete(String path, String id) throws Exception {
+    return this.mockMvc.perform(MockMvcRequestBuilders.delete(path + id));
+  }
 
 }

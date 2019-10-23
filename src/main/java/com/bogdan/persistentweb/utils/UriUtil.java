@@ -5,11 +5,11 @@ import java.net.URISyntaxException;
 
 public class UriUtil {
 
-    public static URI createUri(String uri) {
-        try {
-            return new URI(uri);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(String.format("Invalid URI '%s'", uri), e);
-        }
+  public static URI createUri(String uri) {
+    try {
+      return new URI(uri);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(String.format("Invalid URI '%s'", uri), e);
     }
+  }
 }

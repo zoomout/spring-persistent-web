@@ -16,57 +16,57 @@ import static com.bogdan.persistentweb.exception.ExceptionsSuppliers.productNotF
 @Component
 public class CustomersService {
 
-    private final CustomersRepository customersRepository;
-    private final ProductsRepository productsRepository;
+  private final CustomersRepository customersRepository;
+  private final ProductsRepository productsRepository;
 
-    public CustomersService(
-            CustomersRepository customersRepository,
-            ProductsRepository productsRepository
-    ) {
-        this.customersRepository = customersRepository;
-        this.productsRepository = productsRepository;
-    }
+  public CustomersService(
+      CustomersRepository customersRepository,
+      ProductsRepository productsRepository
+  ) {
+    this.customersRepository = customersRepository;
+    this.productsRepository = productsRepository;
+  }
 
-    public List<Customer> getCustomers() {
-        return (List<Customer>) customersRepository.findAll();
-    }
+  public List<Customer> getCustomers() {
+    return (List<Customer>) customersRepository.findAll();
+  }
 
-    public Customer create(Customer customer) {
-        final Customer entity = new Customer();
-        entity.setName(customer.getName());
-        return customersRepository.save(entity);
-    }
+  public Customer create(Customer customer) {
+    final Customer entity = new Customer();
+    entity.setName(customer.getName());
+    return customersRepository.save(entity);
+  }
 
-    public Customer get(long id) {
-        return customersRepository.findById(id).orElseThrow(customerNotFoundException(id));
-    }
+  public Customer get(long id) {
+    return customersRepository.findById(id).orElseThrow(customerNotFoundException(id));
+  }
 
-    public void update(Customer customer) {
-        final Customer customerToUpdate = get(customer.getId());
-        customerToUpdate.setName(customer.getName());
-        customersRepository.save(customerToUpdate);
-    }
+  public void update(Customer customer) {
+    final Customer customerToUpdate = get(customer.getId());
+    customerToUpdate.setName(customer.getName());
+    customersRepository.save(customerToUpdate);
+  }
 
-    public void delete(long id) {
-        final Customer customer = get(id);
-        customer.getProducts().forEach(p -> p.removeCustomer(customer));
-        customersRepository.deleteById(customer.getId());
-    }
+  public void delete(long id) {
+    final Customer customer = get(id);
+    customer.getProducts().forEach(p -> p.removeCustomer(customer));
+    customersRepository.deleteById(customer.getId());
+  }
 
-    public void addProducts(long customerId, Set<Long> productsIds) {
-        final Customer customer = get(customerId);
-        productsIds.stream()
-                .map(id -> productsRepository.findById(id).orElseThrow(productNotFoundException(id)))
-                .forEach(customer::addProduct);
-        customersRepository.save(customer);
-    }
+  public void addProducts(long customerId, Set<Long> productsIds) {
+    final Customer customer = get(customerId);
+    productsIds.stream()
+        .map(id -> productsRepository.findById(id).orElseThrow(productNotFoundException(id)))
+        .forEach(customer::addProduct);
+    customersRepository.save(customer);
+  }
 
-    public void removeProducts(long customerId, Set<Long> productsIds) {
-        final Customer customer = get(customerId);
-        Set<Product> productsToRemove = customer.getProducts().stream()
-                .filter(p -> productsIds.contains(p.getId())).collect(Collectors.toSet());
-        productsToRemove.forEach(customer::removeProduct);
-        customersRepository.save(customer);
-    }
+  public void removeProducts(long customerId, Set<Long> productsIds) {
+    final Customer customer = get(customerId);
+    Set<Product> productsToRemove = customer.getProducts().stream()
+        .filter(p -> productsIds.contains(p.getId())).collect(Collectors.toSet());
+    productsToRemove.forEach(customer::removeProduct);
+    customersRepository.save(customer);
+  }
 
 }

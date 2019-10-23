@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = LeadingOrTrailingSpacesNotAllowedValidator.class)
 public @interface LeadingOrTrailingSpacesNotAllowed {
 
-    String message() default ErrorMessages.LEADING_TRAILING_SPACES;
+  String message() default ErrorMessages.LEADING_TRAILING_SPACES;
 
-    Class<?>[] groups() default {};
+  Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+  Class<? extends Payload>[] payload() default {};
 }

@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = ValidLongValidator.class)
 public @interface ValidLong {
 
-    String message() default ErrorMessages.VALID_LONG;
+  String message() default ErrorMessages.VALID_LONG;
 
-    Class<?>[] groups() default {};
+  Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+  Class<? extends Payload>[] payload() default {};
 }
