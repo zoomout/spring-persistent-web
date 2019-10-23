@@ -1,7 +1,7 @@
 package com.bogdan.persistentweb.web;
 
 import com.bogdan.persistentweb.utils.ApiClient;
-import com.bogdan.persistentweb.web.dto.TestProduct;
+import com.bogdan.persistentweb.web.dto.TestCustomer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,36 +33,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-class ProductsControllerTest {
+class CustomerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
     private ApiClient client;
 
-    private static final String PRODUCT_URL = "/products/";
+    private static final String CUSTOMER_URL = "/customers/";
 
     @BeforeEach
     void beforeAll() {
-        client = new ApiClient(PRODUCT_URL, mockMvc);
+        client = new ApiClient(CUSTOMER_URL, mockMvc);
     }
 
-    private static Stream<Arguments> validProducts() {
+    private static Stream<Arguments> validCustomers() {
         return Stream.of(
-                Arguments.of((Supplier<TestProduct>) ProductsControllerTest::generateProductDto),
-                Arguments.of((Supplier<TestProduct>) () -> generateProductDto().setId("shouldBeIgnored"))
+                Arguments.of((Supplier<TestCustomer>) CustomerControllerTest::generateCustomerDto),
+                Arguments.of((Supplier<TestCustomer>) () -> generateCustomerDto().setId("shouldBeIgnored"))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("validProducts")
-    void callingPost_shouldCreateProduct(final Supplier<TestProduct> product) throws Exception {
-        // When create content with a valid product payload
-        ResultActions result = client.post(serialized(product.get()));
+    @MethodSource("validCustomers")
+    void callingPost_shouldCreateCustomer(final Supplier<TestCustomer> customer) throws Exception {
+        // When create content with a valid customer payload
+        ResultActions result = client.post(serialized(customer.get()));
 
-        // Then status code is '201 - Created' AND Location header has numeric product Id
+        // Then status code is '201 - Created' AND Location header has numeric customer Id
         result
                 .andExpect(status().isCreated())
-                .andDo((r) -> assertThat(valueOf(idFromLocationHeader(PRODUCT_URL, r)), greaterThan(0)));
+                .andDo((r) -> assertThat(valueOf(idFromLocationHeader(CUSTOMER_URL, r)), greaterThan(0)));
     }
 
     static Stream<Arguments> invalidPayload() {
@@ -72,7 +72,7 @@ class ProductsControllerTest {
     @ParameterizedTest
     @MethodSource("invalidPayload")
     void callingPost_withInvalidContent_shouldReturn400(final String payload) throws Exception {
-        // When create a product with invalid product payload
+        // When create a customer with invalid customer payload
         ResultActions result = client.post(payload);
 
         // Then expect response 400 - Bad request
@@ -80,46 +80,46 @@ class ProductsControllerTest {
     }
 
     @Test
-    void callingGet_shouldRetrieveProduct() throws Exception {
-        // Given product is created
-        final TestProduct createdProduct = createProduct();
+    void callingGet_shouldRetrieveCustomer() throws Exception {
+        // Given customer is created
+        final TestCustomer createdCustomer = createCustomer();
 
-        // When get the product
-        ResultActions resultActions = client.get(createdProduct.getId());
+        // When get the customer
+        ResultActions resultActions = client.get(createdCustomer.getId());
 
-        // Then response is 200 - OK and retrieved product is the same as the created one
+        // Then response is 200 - OK and retrieved customer is the same as the created one
         resultActions
                 .andExpect(status().isOk())
-                .andDo((response) -> assertThat(productFrom(response), is(createdProduct)));
+                .andDo((response) -> assertThat(customerFrom(response), is(createdCustomer)));
     }
 
     @Test
-    void callingDelete_shouldDeleteAProduct() throws Exception {
-        // Given product is created
-        final TestProduct createdProduct = createProduct();
+    void callingDelete_shouldDeleteACustomer() throws Exception {
+        // Given customer is created
+        final TestCustomer createdCustomer = createCustomer();
 
-        // When delete the product
-        ResultActions deleteResult = client.delete(createdProduct.getId());
+        // When delete the customer
+        ResultActions deleteResult = client.delete(createdCustomer.getId());
 
         // Then response is '204 - No content'
         deleteResult.andExpect(status().isNoContent());
         // And '404 - Non found' is returned when trying to retrieve the content
-        client.get(createdProduct.getId()).andExpect(status().isNotFound());
+        client.get(createdCustomer.getId()).andExpect(status().isNotFound());
     }
 
-    private TestProduct productFrom(final MvcResult result) throws java.io.IOException {
-        return deserialized(result.getResponse().getContentAsString(), TestProduct.class);
+    private TestCustomer customerFrom(final MvcResult result) throws java.io.IOException {
+        return deserialized(result.getResponse().getContentAsString(), TestCustomer.class);
     }
 
-    private TestProduct createProduct() throws Exception {
-        final TestProduct product = generateProductDto();
-        MvcResult result = client.post(serialized(product)).andExpect(status().isCreated()).andReturn();
-        product.setId(idFromLocationHeader(PRODUCT_URL, result));
-        return product;
+    private TestCustomer createCustomer() throws Exception {
+        final TestCustomer customer = generateCustomerDto();
+        MvcResult result = client.post(serialized(customer)).andExpect(status().isCreated()).andReturn();
+        customer.setId(idFromLocationHeader(CUSTOMER_URL, result));
+        return customer;
     }
 
-    private static TestProduct generateProductDto() {
-        return new TestProduct().setTitle("product_" + randomAlphanumeric(6));
+    private static TestCustomer generateCustomerDto() {
+        return new TestCustomer().setName("customer_" + randomAlphanumeric(6));
     }
 
 }
