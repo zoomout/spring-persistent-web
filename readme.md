@@ -1,5 +1,8 @@
 # Demo Spring boot web application with persistence
 
+# Quick start
+ - To start the application run: `./quick_start.sh`
+
 # Test
  - unit test
  ```
@@ -10,20 +13,19 @@
 ./gradlew cleanTest integrationTest
 ```
 
-# Work with Database
-- start DB
+# Start in docker container
+- build docker image
     ```
-    docker-compose -f ./deploy/docker-compose.yml up -d 
+    ./gradlew buildDockerImage
     ```
-- stop DB
+- start docker compose (web application and database)
     ```
-    docker-compose -f ./deploy/docker-compose.yml down # don't cleanup volumes
-    docker-compose -f ./deploy/docker-compose.yml down -v # do cleanup volumes
+    docker-compose -f ./deploy/docker-compose.yml up -d
     ```
-- cleanup docker volumes (to remove DB data)
+- stop docker compose
     ```
-  docker system prune --volumes
-   ```
+    docker-compose -f ./deploy/docker-compose.yml down -v
+    ```
 # DB migration
 ```
 ./gradlew -Dflyway.configFiles=flyway/flyway.config flywayMigrate -i

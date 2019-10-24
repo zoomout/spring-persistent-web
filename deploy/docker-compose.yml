@@ -1,8 +1,8 @@
-version: '3.1'
+version: '3'
 
 services:
-
   spring-boot-db:
+    container_name: spring-boot-db
     image: postgres
     restart: always
     environment:
@@ -11,3 +11,17 @@ services:
       POSTGRES_DB: spring_boot_db
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  spring-persistent-web:
+    image: zoomout/spring-persistent-web:latest
+    restart: always
+    environment:
+      DB_HOST: spring-boot-db
+    ports:
+      - 8080:8080
+    depends_on:
+      - spring-boot-db

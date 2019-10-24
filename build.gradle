@@ -1,9 +1,13 @@
+import com.bmuschko.gradle.docker.tasks.image.*
+import com.bmuschko.gradle.docker.tasks.container.*
+
 plugins {
     id 'org.springframework.boot' version '2.1.9.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
     id "org.flywaydb.flyway" version "6.0.6"
     id 'com.adarshr.test-logger' version '2.0.0'
+    id 'com.bmuschko.docker-remote-api' version '5.2.0'
 }
 
 group = 'com.bogdan.spring-persistent-web'
@@ -57,3 +61,31 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+
+task copyJar(type: Copy) {
+    from jar
+    into 'build/docker'
+}
+
+task createDockerfile(type: Dockerfile) {
+    from('openjdk:11.0.4-jre-slim')
+    copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
+    entryPoint('java')
+    defaultCommand('-jar', '/app/spring-persistent-web.jar')
+    exposePort(8080)
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+    dependsOn bootJar
+    dependsOn copyJar
+    dependsOn createDockerfile
+    tags.add("zoomout/spring-persistent-web:latest")
+}
+
+task createDockerContainer(type: DockerCreateContainer) {
+    dependsOn buildDockerImage
+    targetImageId buildDockerImage.getImageId()
+    containerName = 'spring-persistent-web'
+    portBindings = ['8080:8080']
+    autoRemove = true
+}
