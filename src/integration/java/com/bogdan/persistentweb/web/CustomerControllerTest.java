@@ -82,6 +82,16 @@ class CustomerControllerTest {
   }
 
   @Test
+  void callingPost_withUnknownField_shouldReturn400() throws Exception {
+    // When create a customer with invalid customer payload
+    final ResultActions result = client.post("/customers", "{\"foo\":\"bar\"}");
+
+    // Then expect response 400 - Bad request
+    result.andExpect(status().isBadRequest());
+    result.andExpect(content().string("[{\"field\":\"name\",\"message\":\"should not be null\"}]"));
+  }
+
+  @Test
   void callingGet_shouldRetrieveCustomer() throws Exception {
     // Given customer is created
     final TestCustomer createdCustomer = createCustomer();

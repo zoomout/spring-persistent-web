@@ -81,6 +81,16 @@ class ProductsControllerTest {
   }
 
   @Test
+  void callingPost_withUnknownField_shouldReturn400() throws Exception {
+    // When create a customer with invalid customer payload
+    final ResultActions result = client.post("/products", "{\"foo\":\"bar\"}");
+
+    // Then expect response 400 - Bad request
+    result.andExpect(status().isBadRequest());
+    result.andExpect(content().string("[{\"field\":\"title\",\"message\":\"should not be null\"}]"));
+  }
+
+  @Test
   void callingGet_shouldRetrieveProduct() throws Exception {
     // Given product is created
     final TestProduct createdProduct = createProduct();
