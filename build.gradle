@@ -73,10 +73,7 @@ task createDockerfile(type: Dockerfile) {
     entryPoint('java')
     defaultCommand(
             '-Dhttp.maxConnections=100',
-            '-XX:+UnlockExperimentalVMOptions',
-            '-XX:+UseCGroupMemoryLimitForHeap',
-            '-XX:+UseG1GC',
-            '-XX:MaxGCPauseMillis=100',
+            '-XX:+UseZGC',
             '-Xmx2048m',
             '-Xms2048m',
             '-server',
