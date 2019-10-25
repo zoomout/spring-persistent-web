@@ -71,7 +71,18 @@ task createDockerfile(type: Dockerfile) {
     from('openjdk:11.0.4-jre-slim')
     copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
     entryPoint('java')
-    defaultCommand('-jar', '/app/spring-persistent-web.jar')
+    defaultCommand(
+            '-Dhttp.maxConnections=100',
+            '-XX:+UnlockExperimentalVMOptions',
+            '-XX:+UseCGroupMemoryLimitForHeap',
+            '-XX:+UseG1GC',
+            '-XX:MaxGCPauseMillis=100',
+            '-Xmx2048m',
+            '-Xms2048m',
+            '-server',
+            '-jar',
+            '/app/spring-persistent-web.jar'
+    )
     exposePort(10080)
 }
 
