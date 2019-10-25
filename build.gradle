@@ -72,7 +72,7 @@ task createDockerfile(type: Dockerfile) {
     copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
     entryPoint('java')
     defaultCommand('-jar', '/app/spring-persistent-web.jar')
-    exposePort(8080)
+    exposePort(10080)
 }
 
 task buildDockerImage(type: DockerBuildImage) {
@@ -86,6 +86,6 @@ task createDockerContainer(type: DockerCreateContainer) {
     dependsOn buildDockerImage
     targetImageId buildDockerImage.getImageId()
     containerName = 'spring-persistent-web'
-    portBindings = ['8080:8080']
+    portBindings = ['10080:8080']
     autoRemove = true
 }

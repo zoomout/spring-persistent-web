@@ -7,7 +7,7 @@ function health_check() {
     while [[ "${done}" -eq "0" && "${tries}" -lt "10" ]]; do
         echo " * Attempt #${tries}..."
         sleep 2
-        status=$(curl -fso /dev/null -w "%{http_code}" "http://localhost:8080")
+        status=$(curl -fso /dev/null -w "%{http_code}" "http://localhost:10080")
         if [[ "$status" -eq "404" ]]; then
             done=1
         fi
@@ -33,6 +33,6 @@ echo " * Configure database"
 ./gradlew -Dflyway.configFiles=flyway/flyway.config flywayMigrate -i
 
 echo " * Make REST call"
-curl -i -X POST http://localhost:8080/products -H 'Content-Type: application/json' -d '{"title": "ProductTitle"}'
+curl -i -X POST http://localhost:10080/products -H 'Content-Type: application/json' -d '{"title": "ProductTitle"}'
 
 echo "To stop: docker-compose -f ./deploy/docker-compose.yml down -v"

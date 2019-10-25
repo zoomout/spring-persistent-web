@@ -1,0 +1,66 @@
+{
+	"info": {
+		"_postman_id": "84266700-9172-4a3f-ae9a-56526766b904",
+		"name": "spring-persistent-web",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create product",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"ProductTitle\"\n}"
+				},
+				"url": {
+					"raw": "localhost:10080/products",
+					"host": [
+						"localhost"
+					],
+					"port": "10080",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create customer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"CustomerName\"\n}"
+				},
+				"url": {
+					"raw": "localhost:10080/customers",
+					"host": [
+						"localhost"
+					],
+					"port": "10080",
+					"path": [
+						"customers"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
