@@ -4,9 +4,12 @@ import com.bogdan.persistentweb.domain.Customer;
 import com.bogdan.persistentweb.domain.Product;
 import com.bogdan.persistentweb.repository.CustomersRepository;
 import com.bogdan.persistentweb.repository.ProductsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -27,8 +30,8 @@ public class ProductsService {
     this.customersRepository = customersRepository;
   }
 
-  public List<Product> getProducts() {
-    return (List<Product>) productsRepository.findAll();
+  public Page<Product> getProducts(final Pageable pageable) {
+    return productsRepository.findAll(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id")));
   }
 
   public Product create(Product product) {

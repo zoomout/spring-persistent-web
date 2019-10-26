@@ -1,4 +1,4 @@
-package com.bogdan.persistentweb.dependencies;
+package com.bogdan.persistentweb.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +9,7 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_READ
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 @Configuration
-public class Beans {
+public class Dependencies {
 
   @Bean
   public ObjectMapper objectMapper() {

@@ -2,18 +2,20 @@ package com.bogdan.persistentweb.web;
 
 import com.bogdan.persistentweb.domain.Product;
 import com.bogdan.persistentweb.dto.CustomerDto;
+import com.bogdan.persistentweb.dto.PageDto;
 import com.bogdan.persistentweb.dto.ProductDto;
 import com.bogdan.persistentweb.mapper.CustomerMapper;
 import com.bogdan.persistentweb.mapper.ProductMapper;
 import com.bogdan.persistentweb.service.ProductsService;
 import com.bogdan.persistentweb.validation.ValidLong;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,12 +37,14 @@ public class ProductsController {
   }
 
   @GetMapping
-  public List<ProductDto> getProducts() {
-    return productsService
-        .getProducts().stream()
-        .sorted()
-        .map(ProductMapper::toDto)
-        .collect(Collectors.toList());
+  public PageDto<ProductDto> getProducts(final Pageable pageable) {
+    final Page<Product> productsPage = productsService.getProducts(pageable);
+    return new PageDto<>(
+        productsPage.getTotalPages(),
+        productsPage.stream()
+            .map(ProductMapper::toDto)
+            .collect(Collectors.toList())
+    );
   }
 
   @PostMapping
