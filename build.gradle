@@ -72,11 +72,10 @@ task createDockerfile(type: Dockerfile) {
     copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
     entryPoint('java')
     defaultCommand(
-            '-Dhttp.maxConnections=100',
             '-XX:+UnlockExperimentalVMOptions',
             '-XX:+UseZGC',
-            '-Xmx2048m',
-            '-Xms2048m',
+            '-Xmx1024m',
+            '-Xms1024m',
             '-server',
             '-jar',
             '/app/spring-persistent-web.jar'
