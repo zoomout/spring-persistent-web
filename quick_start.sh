@@ -3,7 +3,7 @@
 function health_check() {
     done=0
     tries=0
-    echo "Web server health check: '404' serve is up, '000' - no connection, else - some other problem"
+    echo "Web server health check: '404' server is up, '000' - no connection, else - some other problem"
     while [[ "${done}" -eq "0" && "${tries}" -lt "10" ]]; do
         echo " * Attempt #${tries}..."
         sleep 2

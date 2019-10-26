@@ -30,3 +30,15 @@
 ```
 ./gradlew -Dflyway.configFiles=flyway/flyway.config flywayMigrate -i
 ```
+
+# Jetty vs Tomcat performance comparison
+Load test is done using gatling project here: https://github.com/zoomout/gatling-web-test 
+
+Jetty percentiles table
+![jetty_table](performance/reports/jetty-table.jpg)
+Tomcat percentiles table
+![tomcat_table](performance/reports/tomcat-table.jpg)
+Jetty percentiles graph
+![jetty_graph](performance/reports/jetty-graph.jpg)
+Tomcat percentiles graph
+![tomcat_graph](performance/reports/tomcat-graph.jpg)
