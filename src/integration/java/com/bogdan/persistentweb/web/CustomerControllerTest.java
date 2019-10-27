@@ -18,10 +18,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.stream.Stream;
 
+import static com.bogdan.persistentweb.utils.AssertionUtils.assertPaginationResult;
 import static com.bogdan.persistentweb.utils.EntityGenerators.generateCustomerDto;
 import static com.bogdan.persistentweb.utils.GenericTestData.invalidPayloadData;
 import static com.bogdan.persistentweb.utils.HeaderUtils.idFromLocationHeader;
-import static com.bogdan.persistentweb.utils.MatcherUtils.jsonArrayMatcher;
 import static com.bogdan.persistentweb.utils.SerializationUtils.deserialized;
 import static com.bogdan.persistentweb.utils.SerializationUtils.serialized;
 import static java.lang.Integer.valueOf;
@@ -125,9 +125,8 @@ class CustomerControllerTest {
     final ResultActions result = client.getAll(CUSTOMERS_PATH);
 
     // Then response is '200 - OK' and empty array in payload
-    result
-        .andExpect(status().isOk())
-        .andExpect(content().string(jsonArrayMatcher()));
+    result.andExpect(status().isOk());
+    assertPaginationResult(result);
   }
 
   @Test
