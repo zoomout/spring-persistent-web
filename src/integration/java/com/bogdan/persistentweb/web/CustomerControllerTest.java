@@ -2,6 +2,7 @@ package com.bogdan.persistentweb.web;
 
 import com.bogdan.persistentweb.utils.ApiClient;
 import com.bogdan.persistentweb.web.dto.TestCustomer;
+import com.bogdan.persistentweb.web.helpers.CustomerApiHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.stream.Stream;
@@ -22,7 +22,6 @@ import static com.bogdan.persistentweb.utils.AssertionUtils.assertPaginationResu
 import static com.bogdan.persistentweb.utils.EntityGenerators.generateCustomerDto;
 import static com.bogdan.persistentweb.utils.GenericTestData.invalidPayloadData;
 import static com.bogdan.persistentweb.utils.HeaderUtils.idFromLocationHeader;
-import static com.bogdan.persistentweb.utils.SerializationUtils.deserialized;
 import static com.bogdan.persistentweb.utils.SerializationUtils.serialized;
 import static java.lang.Integer.valueOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,6 +38,7 @@ class CustomerControllerTest {
   @Autowired
   private MockMvc mockMvc;
   private ApiClient client;
+  private CustomerApiHelper customerApi;
 
   private static final String CUSTOMERS_PATH = "/customers/";
   private static final String PRODUCTS_PATH = "/products";
@@ -46,6 +46,7 @@ class CustomerControllerTest {
   @BeforeEach
   void beforeAll() {
     client = new ApiClient(mockMvc);
+    customerApi = new CustomerApiHelper(client);
   }
 
   private static Stream<Arguments> validCustomers() {
@@ -94,7 +95,7 @@ class CustomerControllerTest {
   @Test
   void callingGet_shouldRetrieveCustomer() throws Exception {
     // Given customer is created
-    final TestCustomer createdCustomer = createCustomer();
+    final TestCustomer createdCustomer = customerApi.createCustomer();
 
     // When get the customer
     final ResultActions resultActions = client.get(CUSTOMERS_PATH, createdCustomer.getId());
@@ -102,13 +103,13 @@ class CustomerControllerTest {
     // Then response is 200 - OK and retrieved customer is the same as the created one
     resultActions
         .andExpect(status().isOk())
-        .andDo((response) -> assertThat(customerFrom(response), is(createdCustomer)));
+        .andDo((response) -> assertThat(customerApi.customerFrom(response), is(createdCustomer)));
   }
 
   @Test
   void callingDelete_shouldDeleteACustomer() throws Exception {
     // Given customer is created
-    final TestCustomer createdCustomer = createCustomer();
+    final TestCustomer createdCustomer = customerApi.createCustomer();
 
     // When delete the customer
     final ResultActions deleteResult = client.delete(CUSTOMERS_PATH, createdCustomer.getId());
@@ -132,7 +133,7 @@ class CustomerControllerTest {
   @Test
   void callingGetCustomerProducts_forCustomerWithoutProducts_shouldReturnEmptyList() throws Exception {
     // Given customer is created
-    final TestCustomer createdCustomer = createCustomer();
+    final TestCustomer createdCustomer = customerApi.createCustomer();
 
     // When get all customer products is called
     final ResultActions result = client.getAll(CUSTOMERS_PATH + createdCustomer.getId() + PRODUCTS_PATH);
@@ -141,17 +142,6 @@ class CustomerControllerTest {
     result
         .andExpect(status().isOk())
         .andExpect(content().string("[]"));
-  }
-
-  private TestCustomer customerFrom(final MvcResult result) throws java.io.IOException {
-    return deserialized(result.getResponse().getContentAsString(), TestCustomer.class);
-  }
-
-  private TestCustomer createCustomer() throws Exception {
-    final TestCustomer customer = generateCustomerDto();
-    final MvcResult result = client.post(CUSTOMERS_PATH, serialized(customer)).andExpect(status().isCreated()).andReturn();
-    customer.setId(idFromLocationHeader(CUSTOMERS_PATH, result));
-    return customer;
   }
 
 }

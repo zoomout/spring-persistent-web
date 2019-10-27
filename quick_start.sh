@@ -22,7 +22,7 @@ function health_check() {
 }
 
 echo " * Build docker image"
-./gradlew buildDockerImage
+./gradlew buildDockerImage -PcacheEnabled=${ENABLE_CACHE:=false}
 
 echo " * Start docker compose"
 docker-compose -f ./deploy/docker-compose.yml up -d

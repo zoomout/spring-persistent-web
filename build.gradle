@@ -1,8 +1,8 @@
-import com.bmuschko.gradle.docker.tasks.image.*
-import com.bmuschko.gradle.docker.tasks.container.*
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 
 plugins {
-    id 'org.springframework.boot' version '2.1.9.RELEASE'
+    id 'org.springframework.boot' version '2.2.0.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
     id "org.flywaydb.flyway" version "6.0.6"
@@ -13,6 +13,7 @@ plugins {
 group = 'com.bogdan.spring-persistent-web'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+def cache2kVersion = '1.2.4.Final'
 
 repositories {
     mavenCentral()
@@ -25,6 +26,10 @@ dependencies {
     }
     implementation 'org.springframework.boot:spring-boot-starter-jetty'
     implementation 'org.postgresql:postgresql'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-cache', version: '2.2.0.RELEASE'
+    implementation "org.cache2k:cache2k-api:${cache2kVersion}"
+    implementation "org.cache2k:cache2k-spring:${cache2kVersion}"
+    runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'junit', module: 'junit'
@@ -39,7 +44,6 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
 
 // Integration tests //
 
@@ -65,6 +69,8 @@ task integrationTest(type: Test) {
 
 check.dependsOn integrationTest
 
+// Build docker //
+
 task copyJar(type: Copy) {
     from jar
     into 'build/docker'
@@ -75,6 +81,7 @@ task createDockerfile(type: Dockerfile) {
     copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
     entryPoint('java')
     defaultCommand(
+            "-Dcache.enabled=${project.hasProperty('cacheEnabled') ? getProperty('cacheEnabled') : 'true'}",
             '-XX:+UnlockExperimentalVMOptions',
             '-XX:+UseZGC',
             '-Xmx1024m',
@@ -91,12 +98,4 @@ task buildDockerImage(type: DockerBuildImage) {
     dependsOn copyJar
     dependsOn createDockerfile
     tags.add("zoomout/spring-persistent-web:latest")
-}
-
-task createDockerContainer(type: DockerCreateContainer) {
-    dependsOn buildDockerImage
-    targetImageId buildDockerImage.getImageId()
-    containerName = 'spring-persistent-web'
-    portBindings = ['10080:8080']
-    autoRemove = true
 }

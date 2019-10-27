@@ -55,7 +55,9 @@ class CustomerProductsRelationsTest {
 
   @ParameterizedTest
   @MethodSource("bidirectionalRelations")
-  void creationRelationBetweenCustomerAndProduct_shouldBeSuccessful(final CreateRelationType createRelationType) throws Exception {
+  void creationRelationBetweenCustomerAndProduct_shouldBeSuccessful(
+      final CreateRelationType createRelationType
+  ) throws Exception {
     // Given customer and product are created
     final TestCustomer customer = createCustomer();
     final TestProduct product = createProduct();
@@ -64,8 +66,7 @@ class CustomerProductsRelationsTest {
     ResultActions result = createRelationship(createRelationType, customer, product);
 
     // Then response is '204 - no content'
-    result
-        .andExpect(status().isNoContent());
+    result.andExpect(status().isNoContent());
   }
 
   @ParameterizedTest

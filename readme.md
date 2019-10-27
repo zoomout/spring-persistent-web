@@ -31,6 +31,12 @@
 ./gradlew -Dflyway.configFiles=flyway/flyway.config flywayMigrate -i
 ```
 
+# Enable cache
+To enable cache:
+ - in IDE add variable `cache.enabled=true` into Run configuration | Default: false
+ - in docker-compose `ENABLE_CACHE=true ./quick_start.sh` | Default: false
+ - in docker image `./gradlew buildDockerImage -PcacheEnabled=true` | Default: true
+
 # Jetty vs Tomcat performance comparison
 Load test is done using gatling project here: https://github.com/zoomout/gatling-web-test 
 
