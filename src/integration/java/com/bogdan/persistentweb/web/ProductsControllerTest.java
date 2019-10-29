@@ -2,6 +2,7 @@ package com.bogdan.persistentweb.web;
 
 import com.bogdan.persistentweb.utils.ApiClient;
 import com.bogdan.persistentweb.web.dto.TestProduct;
+import com.bogdan.persistentweb.web.helpers.ProductApiHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.stream.Stream;
@@ -22,7 +22,6 @@ import static com.bogdan.persistentweb.utils.AssertionUtils.assertPaginationResu
 import static com.bogdan.persistentweb.utils.EntityGenerators.generateProductDto;
 import static com.bogdan.persistentweb.utils.GenericTestData.invalidPayloadData;
 import static com.bogdan.persistentweb.utils.HeaderUtils.idFromLocationHeader;
-import static com.bogdan.persistentweb.utils.SerializationUtils.deserialized;
 import static com.bogdan.persistentweb.utils.SerializationUtils.serialized;
 import static java.lang.Integer.valueOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,6 +38,7 @@ class ProductsControllerTest {
   @Autowired
   private MockMvc mockMvc;
   private ApiClient client;
+  private ProductApiHelper productApi;
 
   private static final String PRODUCTS_PATH = "/products/";
   private static final String CUSTOMERS_PATH = "/customers";
@@ -46,6 +46,7 @@ class ProductsControllerTest {
   @BeforeEach
   void beforeAll() {
     client = new ApiClient(mockMvc);
+    productApi = new ProductApiHelper(client);
   }
 
   private static Stream<Arguments> validProducts() {
@@ -81,19 +82,36 @@ class ProductsControllerTest {
   }
 
   @Test
-  void callingPost_withUnknownField_shouldReturn400() throws Exception {
-    // When create a customer with invalid customer payload
+  void callingPost_withoutRequiredField_shouldReturn400() throws Exception {
+    // When create a product with invalid payload
     final ResultActions result = client.post("/products", "{\"foo\":\"bar\"}");
 
     // Then expect response 400 - Bad request
     result.andExpect(status().isBadRequest());
-    result.andExpect(content().string("[{\"field\":\"title\",\"message\":\"should not be null\"}]"));
+    result.andExpect(content().string("{\"message\":\"validation of field 'title' failed: should not be null\"}"));
+  }
+
+  @Test
+  void callingPut_shouldUpdateProduct() throws Exception {
+    // Given created product
+    final TestProduct createdProduct = productApi.createProduct();
+
+    // When update content with a valid product payload
+    final TestProduct updatedProduct = generateProductDto().setId(createdProduct.getId()).setTitle("newTitle");
+    final ResultActions result = client.put(PRODUCTS_PATH + updatedProduct.getId(), serialized(updatedProduct));
+
+    // Then status code is '204 - no content'
+    result.andExpect(status().isNoContent());
+    // And product is updated
+    client.get(PRODUCTS_PATH, createdProduct.getId())
+        .andExpect(status().isOk())
+        .andDo((response) -> assertThat(productApi.productFrom(response), is(updatedProduct)));
   }
 
   @Test
   void callingGet_shouldRetrieveProduct() throws Exception {
     // Given product is created
-    final TestProduct createdProduct = createProduct();
+    final TestProduct createdProduct = productApi.createProduct();
 
     // When get the product
     final ResultActions resultActions = client.get(PRODUCTS_PATH, createdProduct.getId());
@@ -101,56 +119,45 @@ class ProductsControllerTest {
     // Then response is 200 - OK and retrieved product is the same as the created one
     resultActions
         .andExpect(status().isOk())
-        .andDo((response) -> assertThat(productFrom(response), is(createdProduct)));
+        .andDo((response) -> assertThat(productApi.productFrom(response), is(createdProduct)));
   }
 
   @Test
   void callingDelete_shouldDeleteAProduct() throws Exception {
     // Given product is created
-    final TestProduct createdProduct = createProduct();
+    final TestProduct createdProduct = productApi.createProduct();
 
     // When delete the product
     final ResultActions deleteResult = client.delete(PRODUCTS_PATH, createdProduct.getId());
 
     // Then response is '204 - No content'
     deleteResult.andExpect(status().isNoContent());
-    // And '404 - Non found' is returned when trying to retrieve the content
+    // And '404 - Non found' is returned when trying to retrieve the product
     client.get(PRODUCTS_PATH, createdProduct.getId()).andExpect(status().isNotFound());
   }
 
   @Test
   void callingGetAll_shouldReturnAList() throws Exception {
-    // When get all customers products is called
+    // When get all products is called
     final ResultActions result = client.getAll(PRODUCTS_PATH);
 
-    // Then response is '200 - OK' and response has paginated result
+    // Then response is '200 - OK' and paginated result in payload
     result.andExpect(status().isOk());
     assertPaginationResult(result);
   }
 
   @Test
   void callingGetProductCustomers_forProductWithoutCustomers_shouldReturnEmptyList() throws Exception {
-    // Given customer is created
-    final TestProduct createdProduct = createProduct();
+    // Given product is created
+    final TestProduct createdProduct = productApi.createProduct();
 
-    // When get all product customers is called
+    // When get all product's customers is called
     final ResultActions result = client.getAll(PRODUCTS_PATH + createdProduct.getId() + CUSTOMERS_PATH);
 
     // Then response is '200 - OK' and empty array in payload
     result
         .andExpect(status().isOk())
         .andExpect(content().string("[]"));
-  }
-
-  private TestProduct productFrom(final MvcResult result) throws java.io.IOException {
-    return deserialized(result.getResponse().getContentAsString(), TestProduct.class);
-  }
-
-  private TestProduct createProduct() throws Exception {
-    final TestProduct product = generateProductDto();
-    final MvcResult result = client.post(PRODUCTS_PATH, serialized(product)).andExpect(status().isCreated()).andReturn();
-    product.setId(idFromLocationHeader(PRODUCTS_PATH, result));
-    return product;
   }
 
 }

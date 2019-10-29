@@ -84,9 +84,9 @@ public class ProductsController {
   @PutMapping("/{id}/customers")
   public ResponseEntity putProductCustomers(
       @ValidLong @PathVariable String id,
-      @RequestBody Set<CustomerDto> customersIds
+      @RequestBody Set<CustomerDto> customerDtoSet
   ) {
-    productsService.addCustomers(parseLong(id), toIdsSet(customersIds));
+    productsService.addCustomers(parseLong(id), toIdsSet(customerDtoSet));
     return ResponseEntity.noContent().build();
   }
 

@@ -6,9 +6,6 @@ import com.bogdan.persistentweb.dto.CustomerDto;
 public class CustomerMapper {
 
   public static CustomerDto toDto(final Customer customer) {
-    if (customer == null) {
-      return null;
-    }
     return new CustomerDto(String.valueOf(customer.getId()), customer.getName());
   }
 
@@ -17,9 +14,6 @@ public class CustomerMapper {
   }
 
   public static Customer toEntity(final Long id, final CustomerDto customerDto) {
-    if (customerDto == null) {
-      return null;
-    }
     Customer customer = new Customer();
     if (id != null) {
       customer.setId(id);

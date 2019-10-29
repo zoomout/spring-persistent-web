@@ -1,6 +1,7 @@
 package com.bogdan.persistentweb.exception;
 
 import com.bogdan.persistentweb.dto.ErrorDetails;
+import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -20,11 +20,20 @@ public class RestExceptionHandler {
   public ResponseEntity handleConstraintViolationException(
       final HttpServletRequest req,
       final ConstraintViolationException e) {
-    List<ErrorDetails> errors = e.getConstraintViolations().stream()
-        .map(cv -> new ErrorDetails(cv.getPropertyPath().toString(), cv.getMessage()))
-        .collect(Collectors.toList());
+
+    final String message = e.getConstraintViolations().stream()
+        .map(cv -> {
+          final String pathParameterName;
+          if (cv.getPropertyPath() instanceof PathImpl) {
+            pathParameterName = ((PathImpl) cv.getPropertyPath()).getLeafNode().getName();
+          } else {
+            pathParameterName = cv.getPropertyPath().toString();
+          }
+          return "constraint is violated for path parameter '" + pathParameterName + "': " + cv.getMessage();
+        })
+        .collect(Collectors.joining(","));
     return new ResponseEntity<>(
-        errors,
+        new ErrorDetails(null, message),
         HttpStatus.BAD_REQUEST
     );
   }
@@ -40,13 +49,24 @@ public class RestExceptionHandler {
     );
   }
 
+  @ExceptionHandler(InvalidPropertyException.class)
+  @ResponseBody
+  public ResponseEntity handleInvalidPropertyException(
+      final HttpServletRequest req,
+      final InvalidPropertyException e) {
+    return new ResponseEntity<>(
+        new ErrorDetails(null, e.getMessage()),
+        HttpStatus.BAD_REQUEST
+    );
+  }
+
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   public ResponseEntity handleException(
       final HttpServletRequest req,
       final Throwable e
   ) {
-    e.printStackTrace();
+    e.printStackTrace(); //TODO add logging
     return new ResponseEntity<>(
         new ErrorDetails(null, "An error occurred. Please check the logs for more details."),
         HttpStatus.INTERNAL_SERVER_ERROR

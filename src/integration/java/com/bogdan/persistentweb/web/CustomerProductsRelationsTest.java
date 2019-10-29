@@ -3,7 +3,10 @@ package com.bogdan.persistentweb.web;
 import com.bogdan.persistentweb.utils.ApiClient;
 import com.bogdan.persistentweb.web.dto.TestCustomer;
 import com.bogdan.persistentweb.web.dto.TestProduct;
+import com.bogdan.persistentweb.web.helpers.CustomerApiHelper;
+import com.bogdan.persistentweb.web.helpers.ProductApiHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,16 +16,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.bogdan.persistentweb.utils.EntityGenerators.generateCustomerDto;
-import static com.bogdan.persistentweb.utils.EntityGenerators.generateProductDto;
-import static com.bogdan.persistentweb.utils.HeaderUtils.idFromLocationHeader;
 import static com.bogdan.persistentweb.utils.SerializationUtils.deserializedList;
 import static com.bogdan.persistentweb.utils.SerializationUtils.serialized;
 import static org.hamcrest.CoreMatchers.is;
@@ -37,6 +36,8 @@ class CustomerProductsRelationsTest {
   @Autowired
   private MockMvc mockMvc;
   private ApiClient client;
+  private CustomerApiHelper customerApi;
+  private ProductApiHelper productApi;
 
   private static final String CUSTOMERS_PATH = "/customers/";
   private static final String PRODUCTS_PATH = "/products/";
@@ -44,6 +45,8 @@ class CustomerProductsRelationsTest {
   @BeforeEach
   void beforeAll() {
     client = new ApiClient(mockMvc);
+    customerApi = new CustomerApiHelper(client);
+    productApi = new ProductApiHelper(client);
   }
 
   public static Stream<Arguments> bidirectionalRelations() {
@@ -59,8 +62,8 @@ class CustomerProductsRelationsTest {
       final CreateRelationType createRelationType
   ) throws Exception {
     // Given customer and product are created
-    final TestCustomer customer = createCustomer();
-    final TestProduct product = createProduct();
+    final TestCustomer customer = customerApi.createCustomer();
+    final TestProduct product = productApi.createProduct();
 
     // When relation between customer and product is created
     ResultActions result = createRelationship(createRelationType, customer, product);
@@ -75,8 +78,8 @@ class CustomerProductsRelationsTest {
       final CreateRelationType createRelationType
   ) throws Exception {
     // Given customer and product
-    final TestCustomer customer = createCustomer();
-    final TestProduct product = createProduct();
+    final TestCustomer customer = customerApi.createCustomer();
+    final TestProduct product = productApi.createProduct();
 
     // When relation between customer and product is created
     createRelationship(createRelationType, customer, product);
@@ -117,8 +120,8 @@ class CustomerProductsRelationsTest {
       final BreakRelationType breakRelationType
   ) throws Exception {
     // Given customer and product
-    final TestCustomer customer = createCustomer();
-    final TestProduct product = createProduct();
+    final TestCustomer customer = customerApi.createCustomer();
+    final TestProduct product = productApi.createProduct();
     // And relationship between customer and product is created
     createRelationship(createRelationType, customer, product);
 
@@ -140,6 +143,40 @@ class CustomerProductsRelationsTest {
     // And product has no customers
     List<TestCustomer> customers = getListOfItems(getCustomersResult, TestCustomer.class);
     assertThat(customers.size(), is(0));
+  }
+
+  @Test
+  void callingDelete_forCustomerWithProducts_shouldDeleteACustomer() throws Exception {
+    // Given customer and product are created
+    final TestCustomer customer = customerApi.createCustomer();
+    final TestProduct product = productApi.createProduct();
+    // And product is added to customer
+    createRelationship(CreateRelationType.PRODUCT_TO_CUSTOMER, customer, product);
+
+    // When delete the customer
+    final ResultActions deleteResult = client.delete(CUSTOMERS_PATH, customer.getId());
+
+    // Then response is '204 - No content'
+    deleteResult.andExpect(status().isNoContent());
+    // And '404 - Non found' is returned when trying to retrieve the customer
+    client.get(CUSTOMERS_PATH, customer.getId()).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void callingDelete_forProductWithCustomers_shouldDeleteAProduct() throws Exception {
+    // Given customer and product are created
+    final TestCustomer customer = customerApi.createCustomer();
+    final TestProduct product = productApi.createProduct();
+    // And customer is added to product
+    createRelationship(CreateRelationType.CUSTOMER_TO_PRODUCT, customer, product);
+
+    // When delete the product
+    final ResultActions deleteResult = client.delete(PRODUCTS_PATH, product.getId());
+
+    // Then response is '204 - No content'
+    deleteResult.andExpect(status().isNoContent());
+    // And '404 - Non found' is returned when trying to retrieve the product
+    client.get(PRODUCTS_PATH, customer.getId()).andExpect(status().isNotFound());
   }
 
   private ResultActions breakRelationship(
@@ -166,7 +203,7 @@ class CustomerProductsRelationsTest {
       case CUSTOMER_TO_PRODUCT:
         return addCustomersToProduct(product, List.of(customer));
       case PRODUCT_TO_CUSTOMER:
-        return addProductsForCustomer(customer, List.of(product));
+        return addProductsToCustomer(customer, List.of(product));
       default:
         throw new IllegalStateException("Unexpected value: " + createRelationType);
     }
@@ -184,7 +221,7 @@ class CustomerProductsRelationsTest {
     return client.getAll(CUSTOMERS_PATH + customer.getId() + PRODUCTS_PATH);
   }
 
-  private ResultActions addProductsForCustomer(
+  private ResultActions addProductsToCustomer(
       final TestCustomer customer,
       final List<TestProduct> products
   ) {
@@ -240,19 +277,6 @@ class CustomerProductsRelationsTest {
     }
   }
 
-  private TestCustomer createCustomer() throws Exception {
-    final TestCustomer customer = generateCustomerDto();
-    final MvcResult result = client.post(CUSTOMERS_PATH, serialized(customer)).andExpect(status().isCreated()).andReturn();
-    customer.setId(idFromLocationHeader(CUSTOMERS_PATH, result));
-    return customer;
-  }
-
-  private TestProduct createProduct() throws Exception {
-    final TestProduct product = generateProductDto();
-    final MvcResult result = client.post(PRODUCTS_PATH, serialized(product)).andExpect(status().isCreated()).andReturn();
-    product.setId(idFromLocationHeader(PRODUCTS_PATH, result));
-    return product;
-  }
 
   enum CreateRelationType {
     PRODUCT_TO_CUSTOMER,

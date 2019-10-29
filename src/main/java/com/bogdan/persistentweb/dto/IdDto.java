@@ -10,7 +10,7 @@ import java.util.Objects;
 public class IdDto {
 
   @LeadingOrTrailingSpacesNotAllowed
-  @Size(max = 255, message = "size must be between 1 and 255")
+  @Size(min = 1, max = 255, message = "size must be between 1 and 255")
   private final String id;
 
   @JsonCreator

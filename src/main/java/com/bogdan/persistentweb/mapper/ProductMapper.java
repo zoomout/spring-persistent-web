@@ -6,9 +6,6 @@ import com.bogdan.persistentweb.dto.ProductDto;
 public class ProductMapper {
 
   public static ProductDto toDto(final Product Product) {
-    if (Product == null) {
-      return null;
-    }
     return new ProductDto(String.valueOf(Product.getId()), Product.getTitle());
   }
 
@@ -17,9 +14,6 @@ public class ProductMapper {
   }
 
   public static Product toEntity(final Long id, final ProductDto ProductDto) {
-    if (ProductDto == null) {
-      return null;
-    }
     Product Product = new Product();
     if (id != null) {
       Product.setId(id);

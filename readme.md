@@ -37,6 +37,12 @@ To enable cache:
  - in docker-compose `ENABLE_CACHE=true ./quick_start.sh` | Default: false
  - in docker image `./gradlew buildDockerImage -PcacheEnabled=true` | Default: true
 
+# Test coverage
+To generate test coverage report using Jacoco Plugin:
+```
+./gradlew cleanTest test integrationTest jacocoTestReport
+```
+
 # Jetty vs Tomcat performance comparison
 Load test is done using gatling project here: https://github.com/zoomout/gatling-web-test 
 
@@ -48,3 +54,4 @@ Jetty percentiles graph
 ![jetty_graph](performance/reports/jetty-graph.jpg)
 Tomcat percentiles graph
 ![tomcat_graph](performance/reports/tomcat-graph.jpg)
+

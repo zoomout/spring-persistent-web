@@ -13,4 +13,11 @@ public class GenericTestData {
         Arguments.of("absent title", "{\"id\":1}")
     );
   }
+
+  public static Stream<Arguments> leadingAndTrailingSpaceData() {
+    return Stream.of(
+        Arguments.of(" leadingSpace"),
+        Arguments.of("trailingSpace ")
+    );
+  }
 }
