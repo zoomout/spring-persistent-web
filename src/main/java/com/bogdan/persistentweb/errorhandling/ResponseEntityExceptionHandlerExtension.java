@@ -1,4 +1,4 @@
-package com.bogdan.persistentweb.exception;
+package com.bogdan.persistentweb.errorhandling;
 
 import com.bogdan.persistentweb.dto.ErrorDetails;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.stream.Collectors;
@@ -39,14 +38,6 @@ public class ResponseEntityExceptionHandlerExtension extends ResponseEntityExcep
         .collect(Collectors.joining(","));
     final ErrorDetails errorDetails = new ErrorDetails(null, errors);
     return handleExceptionInternal(ex, errorDetails, headers, HttpStatus.BAD_REQUEST, request);
-  }
-
-  @Override
-  protected ResponseEntity<Object> handleNoHandlerFoundException(
-      NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-    final String message = "Resource not found: " + ex.getHttpMethod() + " " + ex.getRequestURL();
-    final ErrorDetails errorDetails = new ErrorDetails(null, message);
-    return handleExceptionInternal(ex, errorDetails, headers, status, request);
   }
 
 }

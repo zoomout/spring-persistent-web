@@ -4,7 +4,6 @@ services:
   spring-boot-db:
     container_name: spring-boot-db
     image: postgres
-    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -19,11 +18,16 @@ services:
   spring-persistent-web:
     container_name: spring-persistent-web
     image: zoomout/spring-persistent-web:latest
-    restart: always
     environment:
       DB_HOST: spring-boot-db
       DB_PORT: 5432
+      WLP_DEBUG_REMOTE: y
     ports:
       - 10080:8080
+      - 6006:6000
     depends_on:
       - spring-boot-db
+    command:
+      - "-Xdebug"
+      - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6000"
+      - "-Dcache.enabled=${ENABLE_CACHE}"

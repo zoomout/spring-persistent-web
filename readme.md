@@ -6,11 +6,11 @@
 # Test
  - unit test
  ```
-./gradlew cleanTest test
+./gradlew clean test
 ```
 - integration test
 ```
-./gradlew cleanTest integrationTest
+./gradlew clean integrationTest
 ```
 
 # Start in docker container

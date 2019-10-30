@@ -28,9 +28,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jetty'
     implementation 'org.postgresql:postgresql'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-cache', version: '2.2.0.RELEASE'
-    implementation "org.cache2k:cache2k-api:${cache2kVersion}"
-    implementation "org.cache2k:cache2k-spring:${cache2kVersion}"
-    runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'junit', module: 'junit'
@@ -95,31 +92,18 @@ tasks.build.dependsOn(jacocoTestReport)
 
 // Build docker //
 
-task copyJar(type: Copy) {
-    from jar
-    into 'build/docker'
-}
-
 task createDockerfile(type: Dockerfile) {
     from('openjdk:11.0.4-jre-slim')
-    copyFile("spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
-    entryPoint('java')
-    defaultCommand(
-            "-Dcache.enabled=${project.hasProperty('cacheEnabled') ? getProperty('cacheEnabled') : 'true'}",
-            '-XX:+UnlockExperimentalVMOptions',
-            '-XX:+UseZGC',
-            '-Xmx1024m',
-            '-Xms1024m',
-            '-server',
-            '-jar',
-            '/app/spring-persistent-web.jar'
-    )
-    exposePort(10080)
+    copyFile("resources/main/entrypoint.sh", '/app/entrypoint.sh')
+    runCommand('chmod +x /app/entrypoint.sh')
+    copyFile("libs/spring-persistent-web-${version}.jar", '/app/spring-persistent-web.jar')
+    entryPoint('/app/entrypoint.sh')
 }
 
 task buildDockerImage(type: DockerBuildImage) {
     dependsOn bootJar
-    dependsOn copyJar
     dependsOn createDockerfile
+    inputDir.set(file("${buildDir}"))
+    dockerFile.set(file("${buildDir}/docker/Dockerfile"))
     tags.add("zoomout/spring-persistent-web:latest")
 }

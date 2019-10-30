@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 function health_check() {
     done=0
@@ -7,7 +8,7 @@ function health_check() {
     while [[ "${done}" -eq "0" && "${tries}" -lt "10" ]]; do
         echo " * Attempt #${tries}..."
         sleep 2
-        status=$(curl -fso /dev/null -w "%{http_code}" "http://localhost:10080")
+        status=$(curl -fso /dev/null -w "%{http_code}" "http://localhost:10080") || true
         if [[ "$status" -eq "404" ]]; then
             done=1
         fi
@@ -22,9 +23,10 @@ function health_check() {
 }
 
 echo " * Build docker image"
-./gradlew buildDockerImage -PcacheEnabled=${ENABLE_CACHE:=false}
+./gradlew buildDockerImage
 
 echo " * Start docker compose"
+export ENABLE_CACHE=${ENABLE_CACHE:false}
 docker-compose -f ./deploy/docker-compose.yml up -d
 
 health_check

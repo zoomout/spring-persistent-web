@@ -176,7 +176,7 @@ class CustomerProductsRelationsTest {
     // Then response is '204 - No content'
     deleteResult.andExpect(status().isNoContent());
     // And '404 - Non found' is returned when trying to retrieve the product
-    client.get(PRODUCTS_PATH, customer.getId()).andExpect(status().isNotFound());
+    client.get(PRODUCTS_PATH, product.getId()).andExpect(status().isNotFound());
   }
 
   private ResultActions breakRelationship(

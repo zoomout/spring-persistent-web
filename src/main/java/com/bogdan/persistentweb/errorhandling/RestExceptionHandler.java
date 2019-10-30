@@ -1,12 +1,15 @@
-package com.bogdan.persistentweb.exception;
+package com.bogdan.persistentweb.errorhandling;
 
 import com.bogdan.persistentweb.dto.ErrorDetails;
+import com.bogdan.persistentweb.exception.EntityNotFoundException;
+import com.bogdan.persistentweb.exception.InvalidPropertyException;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
@@ -57,6 +60,17 @@ public class RestExceptionHandler {
     return new ResponseEntity<>(
         new ErrorDetails(null, e.getMessage()),
         HttpStatus.BAD_REQUEST
+    );
+  }
+
+  @ExceptionHandler(NoHandlerFoundException.class)
+  @ResponseBody
+  public ResponseEntity handleNoHandlerFoundException(
+      final HttpServletRequest req,
+      final NoHandlerFoundException e) {
+    return new ResponseEntity<>(
+        new ErrorDetails(null, e.getMessage()),
+        HttpStatus.NOT_FOUND
     );
   }
 
