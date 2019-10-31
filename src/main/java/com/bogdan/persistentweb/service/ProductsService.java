@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.bogdan.persistentweb.configuration.CachingConfig.PRODUCT_CACHE;
 import static com.bogdan.persistentweb.exception.ExceptionsSuppliers.customerNotFoundException;
 import static com.bogdan.persistentweb.exception.ExceptionsSuppliers.productNotFoundException;
 
 @Component
 public class ProductsService {
 
+  private static final String PRODUCT_CACHE = "com.bogdan.persistentweb.domain.Product";
   private final ProductsRepository productsRepository;
   private final CustomersRepository customersRepository;
 

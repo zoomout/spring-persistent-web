@@ -11,8 +11,4 @@ import org.springframework.context.annotation.Configuration;
     havingValue = "true"
 )
 public class CachingConfig {
-
-  public static final String CUSTOMER_CACHE = "com.bogdan.persistentweb.domain.Customer";
-  public static final String PRODUCT_CACHE = "com.bogdan.persistentweb.domain.Product";
-
 }

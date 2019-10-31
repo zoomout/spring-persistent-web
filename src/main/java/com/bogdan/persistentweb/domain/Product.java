@@ -1,6 +1,7 @@
 package com.bogdan.persistentweb.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.util.Collections;
@@ -22,7 +23,7 @@ public class Product extends BaseEntity {
     this.title = title;
   }
 
-  @ManyToMany(mappedBy = "products")
+  @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
   private Set<Customer> customers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   public Set<Customer> getCustomers() {

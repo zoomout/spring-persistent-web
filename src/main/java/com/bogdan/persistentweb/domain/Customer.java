@@ -19,7 +19,7 @@ public class Customer extends BaseEntity {
     this.name = name;
   }
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "customer_product",
       joinColumns = {@JoinColumn(name = "customer_id")},
